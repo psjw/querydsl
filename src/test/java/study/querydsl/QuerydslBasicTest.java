@@ -25,7 +25,7 @@ public class QuerydslBasicTest {
 
 
     @BeforeEach
-    public void before(){
+    public void before() {
         queryFactory = new JPAQueryFactory(em);
         Team teamA = new Team("teamA");
         Team teamB = new Team("teamB");
@@ -45,7 +45,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void startJPQL(){
+    public void startJPQL() {
         //member1을 찾아라
         Member findMember = em.createQuery("select m from Member m " +
                         "where m.username = :username", Member.class)
@@ -57,7 +57,7 @@ public class QuerydslBasicTest {
     }
 
     @Test
-    public void startQuerydsl(){
+    public void startQuerydsl() {
         //PrepareStatement의 파라미터 바인딩 사용
         //"m"은 JPQL alias -> 만약 자기 자신을 Join 해야되는 경우에만 사용
 //        QMember m = new QMember("m");
@@ -72,6 +72,28 @@ public class QuerydslBasicTest {
         assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 
+    @Test
+    public void search() {
+        Member findMember = queryFactory
+                .selectFrom(member)
+                .where(member.username.eq("member1")
+                        .and(member.age.eq(10)))
+                .fetchOne();
 
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
 
+    @Test
+    public void searchAndParam() {
+        Member findMember = queryFactory
+                .selectFrom(member)
+                // and는 ,도 가능
+                .where(
+                        member.username.eq("member1"),
+                        (member.age.eq(10))
+                )
+                .fetchOne();
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
 }
