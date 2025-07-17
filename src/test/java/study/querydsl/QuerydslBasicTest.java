@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
+import study.querydsl.dto.QMemberDto;
 import study.querydsl.dto.UserDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
@@ -592,6 +593,7 @@ public class QuerydslBasicTest {
     @Test
     public void findUserDtoByConstructor(){
         //생성자인 경우 -> 생성자타입이 일치해야함
+        //런타임 시에 오류가 남
         List<UserDto> result = queryFactory
                 .select(Projections.constructor(UserDto.class,
                         member.username,
@@ -600,6 +602,20 @@ public class QuerydslBasicTest {
                 .fetch();
         for (UserDto userDto : result) {
             System.out.println("userDto = " + userDto);
+        }
+    }
+
+    @Test
+    public void findDtoByQueryProjection(){
+        //컴파일시에 오류가남
+        //단점 : Q파일 생성해야됨, 기존에는 Querydsl을 전혀 몰랐음 -> 의존성이 생김
+        List<MemberDto> result = queryFactory
+                .select(new QMemberDto(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 
