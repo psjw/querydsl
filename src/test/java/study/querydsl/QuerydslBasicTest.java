@@ -18,6 +18,7 @@ import jakarta.persistence.PersistenceUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.QMemberDto;
@@ -674,5 +675,52 @@ public class QuerydslBasicTest {
         //null 처리는 따로 해주어야함
         return usernameEq(usernameCond).and(ageEq(ageCond));
     }
+    
+    @Test
+    @Commit
+    public void bulkUpdate() {
+        //member1 = 10 -> member1
+        //member2 = 20 -> member2
+        //member3 = 30 -> member3
+        //member4 = 40 -> member4
 
+        long count = queryFactory
+                .update(member)
+                .set(member.username, "비회원")
+                .where(member.age.lt(28))
+                .execute();
+
+        em.flush();
+        em.clear();
+        //영속성 컨텍스트가 우선권을 가지므로 member1이 유지가 됨 -> DB에서 조회한 값 무시 -> Repeatable Read
+        //1 member1 = 10 -> 1 비회원
+        //2 member2 = 20 -> 2 비회원
+        //3 member3 = 30 -> 3 member3
+        //4 member4 = 40 -> 4 member4
+
+        List<Member> result = queryFactory
+                .selectFrom(member)
+                .fetch();
+
+        for (Member member1 : result) {
+            System.out.println("member1 = " + member1);
+        }
+    }
+
+
+    @Test
+    public void bulkAdd() {
+        long count = queryFactory
+                .update(member)
+                .set(member.age, member.age.multiply(1))
+                .execute();
+    }
+
+    @Test
+    public void bulkDelete(){
+        long count = queryFactory
+                .delete(member)
+                .where(member.age.gt(18))
+                .execute();
+    }
 }
