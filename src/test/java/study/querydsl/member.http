@@ -1,0 +1,8 @@
+### GET request to example server
+GET http://localhost:8080/v2/members?page=1&size=5
+
+###
+GET http://localhost:8080/v3/members?page=1&size=5
+
+### GET request to example server
+GET http://localhost:8080/v3/members?page=1&size=110
